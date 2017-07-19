@@ -4,6 +4,8 @@
 #
 
 # (Added by Atze)
+
+
 # Max troughput, to limit 'other' performance issues speed is in KB/s
 THROTTLE=<%= @throttle %>
 PIDFILE=/var/run/ionbackup.pid
@@ -30,7 +32,7 @@ monthday=$(date '+%d')
 rsync -e 'ssh -i '$SSHKEYLOCATION --bwlimit="$THROTTLE" -avz --timeout=300 --log-file="/var/log/ionbackup/rsyncbackup.log" /data/iontorrent/ $DESTINATION/archive/
 
 # remove files older than REMOVEFROMARCHIVE days from /data/iontorrent
-# find /data/iontorrent -type f -mtime +$REMOVEFROMARCHIVE -ls -exec rm -f -- {} \;
+find /data/iontorrent -type f -mtime +$REMOVEFROMARCHIVE -ls -exec rm -f -- {} \;
 
 # Backup results location, delete file in destination every 1st day of the month.
 if [ "$monthday" = "01" ]; then
