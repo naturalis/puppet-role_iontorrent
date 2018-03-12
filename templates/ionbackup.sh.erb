@@ -28,8 +28,10 @@ if [ -e "$PIDFILE" ] ; then
 # find out day of the month.
 monthday=$(date '+%d')
 
-# Backup archive location, does not delete any files at target location. ( should be kept atleast 5 years )
-rsync -e 'ssh -i '$SSHKEYLOCATION --bwlimit="$THROTTLE" -avz --timeout=300 --log-file="/var/log/ionbackup/rsyncbackup.log" /data/iontorrent/ $DESTINATION/archive/
+# Backup archive location, does not delete any files at target location. ( should be kept atleast 5 years ) using awscli to S3 -> Glacier
+aws s3 sync --no-progress /data/iontorrent s3://<%= @aws_archive_bucket %> >> /var/log/ionbackup/s3backuparchive.log
+
+#rsync -e 'ssh -i '$SSHKEYLOCATION --bwlimit="$THROTTLE" -avz --timeout=300 --log-file="/var/log/ionbackup/rsyncbackup.log" /data/iontorrent/ $DESTINATION/archive/
 
 # remove files older than REMOVEFROMARCHIVE days from /data/iontorrent
 find /data/iontorrent -type f -mtime +$REMOVEFROMARCHIVE -ls -exec rm -f -- {} \;

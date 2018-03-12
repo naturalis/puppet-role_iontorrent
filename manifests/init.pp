@@ -8,18 +8,41 @@
 #
 #
 class role_iontorrent (
-  $destination          = 'ionbackup@x.x.x.x:/data/ionbackup',
-  $scriptdir            = '/opt/ionbackup',
-  $privatekeyname       = 'ionbackup.key',
-  $throttle             = '6400',
-  $removefromarchive    = '730',
-  $cronhour             = '19',
-  $cronminute           = '0',
+  $destination            = 'ionbackup@x.x.x.x:/data/ionbackup',
+  $scriptdir              = '/opt/ionbackup',
+  $privatekeyname         = 'ionbackup.key',
+  $throttle               = '6400',
+  $removefromarchive      = '730',
+  $cronhour               = '19',
+  $cronminute             = '0',
+  $aws_access_key_id      = 'keyid',
+  $aws_secret_access_key  = 'accesskey',
+  $aws_archive_bucket     = 'iontorrent-archive'
  )
 {
   file { $scriptdir:
     ensure        => 'directory',
   }
+
+  file { '/root/.aws':
+    ensure        => 'directory',
+    mode          => '0700'
+  }
+
+  file {"/root/.aws/config":
+    ensure        => 'file',
+    mode          => '0600',
+    content       => template('role_iontorrent/awsconfig.erb'),
+    require       => File['/root/.aws']
+  }
+
+  ensure_packages('python-pip')
+
+  ensure_packages(['awscli'], {
+    ensure   => present,
+    provider => 'pip',
+    require  => [ Package['python-pip'], ],
+  })
 
   file {"${scriptdir}/ionbackup.sh":
     ensure        => 'file',
